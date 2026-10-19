@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -37,7 +38,7 @@ func FromEnv() *Config {
 	return &Config{
 		HTTPAddr:       getEnv("HTTP_ADDR", ":8080"),
 		DatabaseURL:    getEnv("DATABASE_URL", "postgres://soc2:soc2@localhost:5433/soc2?sslmode=disable"),
-		JWTSecret:      getEnv("JWT_SECRET", "dev-only-secret-change-me"),
+		JWTSecret:      getEnv("JWT_SECRET", ""),
 		JWTTTL:         getEnvInt("JWT_TTL_HOURS", 24),
 		TemplatesDir:   getEnv("TEMPLATES_DIR", "../templates"),
 		EncryptionKey:  getEnv("ENCRYPTION_KEY", ""),
@@ -58,6 +59,23 @@ func FromEnv() *Config {
 		GoogleTokenURL:     getEnv("GOOGLE_TOKEN_URL", "https://oauth2.googleapis.com/token"),
 		GoogleUserinfoURL:  getEnv("GOOGLE_USERINFO_URL", "https://www.googleapis.com/oauth2/v2/userinfo"),
 	}
+}
+
+// Validate rejects missing or known example secrets before opening the database.
+// A minimum length is only a guardrail: operators must generate random secrets.
+func (c *Config) Validate() error {
+	if len(strings.TrimSpace(c.JWTSecret)) < 32 || strings.HasPrefix(c.JWTSecret, "change-me") || c.JWTSecret == "dev-only-secret-change-me" {
+		return errors.New("JWT_SECRET must be an explicitly configured random secret of at least 32 characters")
+	}
+	if strings.TrimSpace(c.EncryptionKEK) == "" {
+		if len(strings.TrimSpace(c.EncryptionKey)) < 32 || strings.HasPrefix(c.EncryptionKey, "change-me") || c.EncryptionKey == "soc2-dev-only-master-key-not-for-production" {
+			return errors.New("configure ENCRYPTION_KEK_ID or a random ENCRYPTION_KEY of at least 32 characters")
+		}
+		if c.EncryptionKey == c.JWTSecret {
+			return errors.New("JWT_SECRET and ENCRYPTION_KEY must be different secrets")
+		}
+	}
+	return nil
 }
 
 func getEnvList(key, fallback string) []string {
