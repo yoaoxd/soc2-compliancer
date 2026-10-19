@@ -18,6 +18,9 @@ import (
 
 func main() {
 	cfg := config.FromEnv()
+	if err := cfg.Validate(); err != nil {
+		log.Fatalf("configuration: %v", err)
+	}
 	ctx := context.Background()
 
 	pool, err := db.Connect(ctx, cfg.DatabaseURL)
