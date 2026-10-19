@@ -1,0 +1,52 @@
+name: postgres_flexible
+resource_types:
+  - azurerm_postgresql_flexible_server
+description: SOC2-compliant Azure Database for PostgreSQL (flexible) with TLS, private networking, HA, backups, CMEK and deletion protection.
+version: 1.0.0
+category: database
+controls:
+  - CC6.6
+  - CC6.7
+  - A1.1
+  - A1.2
+  - A1.3
+  - C1.1
+dependencies: []
+wiring:
+  - variable: kms_key
+    module: key_vault
+    output: key_vault_key_id
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: server_name
+    type: string
+    required: true
+  - name: resource_group_name
+    type: string
+    required: true
+  - name: location
+    type: string
+    required: false
+  - name: administrator_login
+    type: string
+    required: true
+  - name: administrator_password
+    type: string
+    required: true
+  - name: sku_name
+    type: string
+    required: false
+  - name: zone_redundant_ha
+    type: bool
+    required: false
+  - name: backup_retention_days
+    type: number
+    required: false
+  - name: kms_key
+    type: string
+    required: false
+  - name: private_dns_zone_id
+    type: string
+    required: false

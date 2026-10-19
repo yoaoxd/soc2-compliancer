@@ -1,0 +1,49 @@
+name: rds_postgres
+resource_types:
+  - aws_db_instance
+description: SOC2-compliant RDS PostgreSQL with encryption, backups, HA, deletion protection and TLS enforcement.
+version: 1.0.0
+category: database
+controls:
+  - CC6.6
+  - CC6.7
+  - A1.1
+  - A1.2
+  - A1.3
+  - C1.1
+dependencies: []
+wiring:
+  - variable: kms_key
+    module: kms_key
+    output: key_arn
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: instance_identifier
+    type: string
+    required: true
+  - name: db_name
+    type: string
+    required: false
+  - name: username
+    type: string
+    required: true
+  - name: password
+    type: string
+    required: true
+  - name: instance_class
+    type: string
+    required: false
+  - name: allocated_storage_gb
+    type: number
+    required: false
+  - name: multi_az
+    type: bool
+    required: false
+  - name: backup_retention_days
+    type: number
+    required: false
+  - name: kms_key
+    type: string
+    required: false

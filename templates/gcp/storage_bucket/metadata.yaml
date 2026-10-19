@@ -1,0 +1,43 @@
+name: storage_bucket
+resource_types:
+  - google_storage_bucket
+description: SOC2-compliant Cloud Storage bucket with uniform access, CMEK encryption, versioning and retention.
+version: 1.0.0
+category: storage
+controls:
+  - CC6.1
+  - CC6.6
+  - CC6.7
+  - C1.1
+  - A1.2
+  - C1.2
+dependencies: []
+wiring:
+  - variable: kms_key
+    module: kms_key
+    output: key_id
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: project_id
+    type: string
+    required: true
+  - name: bucket_name
+    type: string
+    required: true
+  - name: location
+    type: string
+    required: false
+  - name: kms_key
+    type: string
+    required: false
+  - name: retention_days
+    type: number
+    required: false
+  - name: lock_retention
+    type: bool
+    required: false
+  - name: force_destroy
+    type: bool
+    required: false

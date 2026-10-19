@@ -1,0 +1,40 @@
+name: s3_bucket
+resource_types:
+  - aws_s3_bucket
+description: SOC2-compliant S3 bucket with public access blocked, SSE-KMS encryption, versioning and object lock retention.
+version: 1.0.0
+category: storage
+controls:
+  - CC6.1
+  - CC6.6
+  - CC6.7
+  - C1.1
+  - A1.2
+  - C1.2
+dependencies: []
+wiring:
+  - variable: kms_key
+    module: kms_key
+    output: key_arn
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: bucket_name
+    type: string
+    required: true
+  - name: force_destroy
+    type: bool
+    required: false
+  - name: kms_key
+    type: string
+    required: false
+  - name: versioning_enabled
+    type: bool
+    required: false
+  - name: object_lock_enabled
+    type: bool
+    required: false
+  - name: retention_days
+    type: number
+    required: false

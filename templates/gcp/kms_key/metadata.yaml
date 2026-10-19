@@ -1,0 +1,33 @@
+name: kms_key
+resource_types:
+  - google_kms_key_ring
+  - google_kms_crypto_key
+description: Customer-managed encryption key (CMEK) with automatic rotation and least-privilege grantor.
+version: 1.0.0
+category: secrets
+controls:
+  - CC6.1
+  - C1.1
+dependencies: []
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: project_id
+    type: string
+    required: true
+  - name: key_ring_name
+    type: string
+    required: false
+  - name: crypto_key_name
+    type: string
+    required: false
+  - name: location
+    type: string
+    required: false
+  - name: rotation_seconds
+    type: number
+    required: false
+  - name: iam_member
+    type: string
+    required: false

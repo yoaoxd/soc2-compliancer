@@ -1,0 +1,35 @@
+# Go
+api/bin/
+*.exe
+*.test
+*.out
+
+# Node
+node_modules/
+webapp/dist/
+npm-debug.log*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!**/*.tfvars.example
+.terraform.lock.hcl
+
+# Env
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+*.swp
+# Generated TypeScript build artifacts
+*.tsbuildinfo
+webapp/vite.config.js
+webapp/vite.config.d.ts

@@ -1,0 +1,20 @@
+name: kms_key
+resource_types:
+  - aws_kms_key
+description: SOC2-compliant KMS customer-managed key with automatic rotation.
+version: 1.0.0
+category: security
+controls:
+  - CC6.1
+  - CC6.7
+dependencies: []
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: description
+    type: string
+    required: false
+  - name: alias
+    type: string
+    required: false

@@ -1,0 +1,51 @@
+name: sql_postgres
+resource_types:
+  - google_sql_database_instance
+description: SOC2-compliant Cloud SQL for PostgreSQL with encrypted connections, regional HA, backups and deletion protection.
+version: 1.0.0
+category: data
+controls:
+  - CC6.6
+  - CC6.7
+  - A1.1
+  - A1.2
+dependencies:
+  - kms_key
+wiring:
+  - variable: kms_key
+    module: kms_key
+    output: key_id
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: project_id
+    type: string
+    required: true
+  - name: instance_name
+    type: string
+    required: true
+  - name: region
+    type: string
+    required: false
+  - name: tier
+    type: string
+    required: false
+  - name: disk_type
+    type: string
+    required: false
+  - name: disk_size_gb
+    type: number
+    required: false
+  - name: kms_key
+    type: string
+    required: false
+  - name: private_network
+    type: string
+    required: false
+  - name: enable_public_ip
+    type: bool
+    required: false
+  - name: authorized_networks
+    type: list(map(string))
+    required: false

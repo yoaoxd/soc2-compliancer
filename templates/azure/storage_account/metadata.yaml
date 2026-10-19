@@ -1,0 +1,43 @@
+name: storage_account
+resource_types:
+  - azurerm_storage_account
+description: SOC2-compliant Azure Storage account with public access disabled, TLS 1.2, CMK encryption, versioning and retention.
+version: 1.0.0
+category: storage
+controls:
+  - CC6.1
+  - CC6.6
+  - CC6.7
+  - C1.1
+  - A1.2
+  - C1.2
+dependencies: []
+wiring:
+  - variable: kms_key
+    module: key_vault
+    output: key_vault_key_id
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: account_name
+    type: string
+    required: true
+  - name: resource_group_name
+    type: string
+    required: true
+  - name: location
+    type: string
+    required: false
+  - name: kms_key
+    type: string
+    required: false
+  - name: min_tls_version
+    type: string
+    required: false
+  - name: enable_versioning
+    type: bool
+    required: false
+  - name: retention_days
+    type: number
+    required: false
