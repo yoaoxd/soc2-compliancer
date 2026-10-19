@@ -1,0 +1,23 @@
+name: storage_bucket
+resource_types:
+  - google_storage_bucket
+description: SOC2-compliant Cloud Storage bucket with uniform access, encryption and retention.
+version: 1.0.0
+category: storage
+controls:
+  - CC6.1
+  - CC6.6
+  - CC6.7
+  - C1.1
+  - A1.2
+dependencies: []
+tests:
+  - checkov
+  - tfsec
+variables:
+  - name: project_id
+    required: true
+  - name: bucket_name
+    required: true
+  - name: kms_key
+    required: false
