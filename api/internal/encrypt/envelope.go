@@ -47,7 +47,7 @@ func New(masterKey string, ext KEK) (*envelopeCrypter, error) {
 		return &envelopeCrypter{kek: ext}, nil
 	}
 	if masterKey == "" {
-		masterKey = "soc2-dev-only-master-key-not-for-production"
+		return nil, errors.New("encryption requires an explicit master key or external KEK")
 	}
 	return &envelopeCrypter{kek: &localKEK{key: hashedKey(masterKey)}}, nil
 }
