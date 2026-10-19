@@ -13,22 +13,9 @@ SOC2 Compliancer connects cloud configuration findings with control mappings and
 - **Control coverage:** a registry of control summaries and a matrix connecting findings to infrastructure guardrails.
 - **Credential handling:** envelope encryption with local or AWS KMS key wrapping.
 
-## Architecture
+## Explore the design
 
-```text
-React dashboard
-       |
-       v
-Go HTTP API ---- PostgreSQL
-       |
-       +---- Terraform catalog ---> bundle generator ---> reviewed Terraform
-       |
-       +---- cloud collectors ---> rules ---> findings + remediation proposals
-                                         |
-                                         +---- control coverage and scan history
-```
-
-The collection workflow reads cloud configuration. Applying generated Terraform is a separate operator action. Cloud permissions must be scoped separately for each connector.
+See [architecture and decisions](PROJECT.md#architecture), [cloud coverage](PROJECT.md#cloud-coverage), and a [worked bucket-access example](PROJECT.md#example-review-a-bucket-access-finding).
 
 ## Repository layout
 
@@ -38,7 +25,7 @@ The collection workflow reads cloud configuration. Applying generated Terraform 
 | `webapp/` | React and TypeScript dashboard |
 | `templates/` | Terraform modules, connector templates, and control metadata |
 | `scripts/` | Template validation tooling |
-| `PROJECT.md` | Detailed implementation notes and development history |
+| `PROJECT.md` | Architecture, coverage, worked example, and limitations |
 
 ## Local development
 
@@ -50,9 +37,11 @@ Start the database from the repository root:
 docker compose up -d postgres
 ```
 
-In one terminal:
+Generate two different random secrets, save them securely, and export them in the API terminal. The following commands are an example for a fresh local setup; retain the encryption key for subsequent starts:
 
 ```bash
+export JWT_SECRET="$(openssl rand -hex 32)"
+export ENCRYPTION_KEY="$(openssl rand -hex 32)"
 cd api
 go mod download
 go run ./cmd/api
@@ -81,13 +70,13 @@ Use the dashboard to register, select a provider, inspect the module catalog, an
 
 This is a development implementation published for review. No tests, cloud scans, or deployment validation were run as part of this publication. Test sources and validation scripts are included; their presence is not a claim that they pass.
 
-- Some remediation snippets need correction. In particular, an IAM-removal proposal currently declares the same binding as a Terraform resource. Treat every remediation as a draft; do not apply it without reviewing the full plan and existing resource configuration.
-- Development defaults exist for session signing and local encryption. Production use requires explicit secret configuration and further security review.
-- A completed scan or absence of findings does not prove full coverage. Missing permissions, unavailable APIs, and unsupported resources can limit observations.
-- The evidence matrix summarizes technical observations. It does not establish operating effectiveness over an audit period or replace an independent SOC 2 examination.
-- Control mappings are project-authored interpretations. The `soc2_2025` label mentioned in older planning notes is unverified and is not a supported edition claim.
-- `PROJECT.md` contains historical completion and validation statements; they are not fresh verification results. This section describes the publication status.
+- The API requires explicit signing and encryption secrets at startup. `.env.example` is a reference; the API does not load it automatically. AWS KMS wrapping is available through `ENCRYPTION_KEK_ID`.
+- IAM-binding removal and service-account/access-key retirement provide manual guidance, without generating grants or new keys as a removal operation.
+- Other remediation snippets remain illustrative drafts, with placeholders and settings that require resource-specific and provider-schema review. Review the full plan before any apply.
+- A completed scan or absence of findings does not prove full coverage. Missing permissions, unavailable APIs and unsupported resources can limit observations.
+- The evidence matrix and project-authored control mappings support technical review; they do not certify compliance or establish effectiveness over an audit period.
 
+See [detailed limitations](PROJECT.md#limits-that-matter), including the migration implications of changing an existing encryption key.
 SOC 2 readiness depends on organizational processes, people, scope, and evidence as well as infrastructure configuration. This project supports selected technical controls; it does not certify compliance.
 
 ## Validation tooling
