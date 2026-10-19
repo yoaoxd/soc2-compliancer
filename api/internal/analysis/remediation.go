@@ -34,6 +34,9 @@ func slugFor(name string) string {
 }
 
 func remediate(rType, rName, check string, tfConfig, notes string) Remediation {
+	if check == "aws_iam_user_access_keys" {
+		return manualRemediation(rType, notes+" Identify the exact access key and its consumers. Confirm replacement role-based access before disabling and deleting the approved key. No new access key is proposed.")
+	}
 	label := slugFor(rName)
 	address := rType + "." + label
 	importCmd := fmt.Sprintf("terraform import %s %s", address, rName)
@@ -45,11 +48,11 @@ func remediate(rType, rName, check string, tfConfig, notes string) Remediation {
 		ResourceAddress: address,
 		ResourceType:    rType,
 		TerraformConfig: tfConfig,
-		Notes:           notes,
+		Notes:           "Illustrative draft: preserve existing resource settings, verify provider schema and import identity, and review the complete plan before use. " + notes,
 	}
 }
 
-// bucketRemediation emits a compliant storage bucket snippet for the given bucket.
+// bucketRemediation emits an illustrative bucket configuration for review.
 func bucketRemediation(rName, check, notes string) Remediation {
 	cfg := `resource "google_storage_bucket" "` + slugFor(rName) + `" {
   name                        = "` + rName + `"
@@ -122,35 +125,25 @@ variable "region"      { default = "us-central1" }`
 	return remediate("google_compute_subnetwork", rName, check, cfg, notes)
 }
 
-func projectIAMRemediation(member, role, notes string) Remediation {
-	cfg := fmt.Sprintf(`# Remove %q (role %q) from the project
-resource "google_project_iam_member" "removed" {
-  project = var.project_id
-  role    = %q
-  member  = %q
+// manualRemediation intentionally returns no executable configuration or command.
+// Collection cannot identify the owning Terraform state or approve access removal.
+func manualRemediation(rType, notes string) Remediation {
+	return Remediation{
+		ResourceType: rType,
+		Notes: "Manual review required. " + notes,
+	}
 }
-`, member, role, role, member)
-	rem := remediate("google_project_iam_member", "removed", "project_primitive_roles", cfg, notes)
-	rem.ImportCommand = fmt.Sprintf("gcloud projects remove-iam-policy-binding YOUR_PROJECT --member=%s --role=%s", member, role)
-	return rem
+
+func projectIAMRemediation(member, role, notes string) Remediation {
+	return manualRemediation("google_project_iam_member", fmt.Sprintf(
+		"%s Review binding member=%q role=%q in the affected project. Identify its owning configuration and preserve required access before removing that exact binding through a reviewed change. Declaring an IAM member resource grants access; it does not revoke it. Do not use terraform state rm as an access-revocation operation.",
+		notes, member, role))
 }
 
 func saKeyRemediation(email, notes string) Remediation {
-	cfg := `# Delete the user-managed key (k1) and disable it so it can no longer be used.
-resource "google_service_account_key" "this" {
-  service_account_id = var.service_account_email
-  key_algorithm      = "KEY_ALG_RSA_2048"
-  keepers = {
-    "rotation" = "rotate-me"
-  }
-}
-
-# After rotating, remove old keys:
-#   gcloud iam service-accounts keys delete $KEY_ID --iam-account=$EMAIL
-`
-	rem := remediate("google_service_account_key", "this", "sa_user_managed_keys", cfg, notes)
-	rem.ImportCommand = fmt.Sprintf("gcloud iam service-accounts keys list --iam-account=%s --managed-by=user", email)
-	return rem
+	return manualRemediation("google_service_account_key", fmt.Sprintf(
+		"%s Inventory user-managed keys for service account %q and identify their consumers. Migrate workloads to keyless authentication where possible; confirm replacement access before disabling and deleting each approved old key. This finding does not identify a safe key ID to delete. No new key is proposed.",
+		notes, email))
 }
 
 func loggingSinkRemediation(check string, notes string) Remediation {
