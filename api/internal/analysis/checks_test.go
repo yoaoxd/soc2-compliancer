@@ -234,8 +234,8 @@ func TestPrimitiveRoles(t *testing.T) {
 	if len(got) != 1 || got[0].CheckName != "project_primitive_roles" || got[0].Severity != "high" {
 		t.Fatalf("unexpected: %+v", got)
 	}
-	if !strings.Contains(got[0].Remediation.ImportCommand, "gcloud projects remove-iam-policy-binding") {
-		t.Fatalf("unexpected import command: %s", got[0].Remediation.ImportCommand)
+	if got[0].Remediation.ImportCommand != "" || got[0].Remediation.TerraformConfig != "" {
+		t.Fatal("IAM removal must not emit a grant or an unreviewed mutation command")
 	}
 }
 
